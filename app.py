@@ -5,6 +5,8 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+st.set_page_config(layout="wide")
+
 st.title('Black Scholes Calculator')
 
 Spot_price = st.sidebar.slider("Spot Price: ", 3.50, 6.00, 4.00, step = 0.01)
@@ -63,32 +65,44 @@ for j, sigma in enumerate(Vol):
         P = X * np.exp(-R/100 * Time) * norm.cdf(-d2) - Spot_price * norm.cdf(-d1)
         put_prices[j, z] = P
 
-fig, ax = plt.subplots(figsize=(8, 6))
+fig, ax = plt.subplots(figsize=(20, 15), dpi=200)
 
-fig1, ax1 = plt.subplots(figsize=(8, 6))
+fig1, ax1 = plt.subplots(figsize=(20, 15), dpi=200)
 
 vol_ax = [f"{v*100:.0f}%" for v in Vol]
 strike_ax = [f"${round(s, 2)}" for s in Strike_price]
 
-ax = sns.heatmap(call_prices, annot=True, cmap="viridis", cbar=False, fmt=".2f", cbar_kws={'label': 'Value of C'}, xticklabels=strike_ax,yticklabels=vol_ax, ax=ax)
+col3, col4 = st.columns(2)
 
-ax1 = sns.heatmap(put_prices, annot=True, cmap="viridis", cbar=False, fmt=".2f", cbar_kws={'label': 'Value of P'}, xticklabels=strike_ax,yticklabels=vol_ax, ax=ax1)
+with col3:
+    ax = sns.heatmap(call_prices, annot=True, cmap="viridis", annot_kws={"size": 35, "weight": "bold"}, cbar=False, fmt=".2f", cbar_kws={'label': 'Value of C'}, xticklabels=strike_ax,yticklabels=vol_ax, ax=ax)
 
-ax.set_xlabel("Strike Price")
-ax.set_ylabel("Volatility")
+    ax.set_xlabel("Strike Price", fontsize = 25, fontweight = "bold")
+    ax.set_ylabel("Volatility", fontsize = 25, fontweight = "bold")
 
-ax1.set_xlabel("Strike Price")
-ax1.set_ylabel("Volatility")
+    ax.tick_params(axis="x", labelsize=25) 
+    ax.tick_params(axis="y", labelsize=25)
 
-st.markdown (
+    st.markdown (
     f"<h1 style='text-align: left; font-size:20px;'>Call Option:</h1>",
-    unsafe_allow_html=True
-)
-st.pyplot(fig)
+    unsafe_allow_html=True)
 
-st.markdown (
+    st.pyplot(fig)
+
+with col4:
+    ax1 = sns.heatmap(put_prices, annot=True, cmap="viridis", annot_kws={"size": 35, "weight": "bold"},  cbar=False, fmt=".2f", cbar_kws={'label': 'Value of P'}, xticklabels=strike_ax,yticklabels=vol_ax, ax=ax1)
+
+    ax1.set_xlabel("Strike Price")
+    ax1.set_ylabel("Volatility")
+
+    ax1.set_xlabel("Strike Price", fontsize = 25, fontweight = "bold")
+    ax1.set_ylabel("Volatility", fontsize = 25, fontweight = "bold")
+
+    ax1.tick_params(axis="x", labelsize=25)
+    ax1.tick_params(axis="y", labelsize=25)
+
+    st.markdown (
     f"<h1 style='text-align: left; font-size:20px;'>Put Option:</h1>",
-    unsafe_allow_html=True
-)
+    unsafe_allow_html=True)
 
-st.pyplot(fig1)
+    st.pyplot(fig1)
