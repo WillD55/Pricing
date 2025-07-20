@@ -9,9 +9,23 @@ st.set_page_config(layout="wide")
 
 st.title('Black Scholes Calculator')
 
-Spot_price = st.sidebar.slider("Spot Price: ", 3.50, 6.00, 4.00, step = 0.01)
+Spot_price = st.sidebar.number_input(
+    "Spot Price", 
+    min_value=0.00, 
+    max_value=500.00, 
+    value=4.00, 
+    step=0.01, 
+    format="%.2f"
+)
 
-Strike = st.sidebar.slider("Strike Price: ", 3.50, 6.00, 4.00, step = 0.01)
+Strike = st.sidebar.number_input(
+    "Strike Price", 
+    min_value=0.00, 
+    max_value=500.00, 
+    value=4.00, 
+    step=0.01, 
+    format="%.2f"
+)
 
 Volatility = st.sidebar.slider("Volatility (%): ", 0.0, 50.0, 20.0, step = 5.0)
 
