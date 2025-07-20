@@ -5,95 +5,89 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-st.title('Future Price Calculator (Copper)')
+st.title('Black Scholes Calculator')
 
 Spot_price = st.sidebar.slider("Spot Price: ", 3.50, 6.00, 4.00, step = 0.01)
 
+Strike = st.sidebar.slider("Strike Price: ", 3.50, 6.00, 4.00, step = 0.01)
+
+Volatility = st.sidebar.slider("Volatility (%): ", 0.0, 50.0, 20.0, step = 5.0)
+
 R = st.sidebar.slider("Risk-free rate (%): ", 2.0, 6.0, 2.0, step = 0.1)
 
-Storage = st.sidebar.slider("Storage Cost (%): ", 0.00, 3.00, 1.00, step = 0.01)
+#Storage = st.sidebar.slider("Storage Cost (%): ", 0.00, 3.00, 1.00, step = 0.01)
 
 Time = st.sidebar.slider("Time to maturity (year): ", 0.0, 3.00, 1.0, step = 0.5)
 
-F_t = Spot_price * np.exp((R/100 + Storage/100) * Time)
-F_t = round(F_t, 2)
+d1 = (np.log(Spot_price / Strike) + (R/100 + 0.5 * Volatility/100 ** 2) * Time) / (Volatility * np.sqrt(Time))
+d2 = d1 - Volatility/100 * np.sqrt(Time)
 
-st.markdown (
-    f"<h1 style='text-align: left; font-size:20px;'>The fair price of the copper futures contract is ${F_t} per pound</h1>",
-    unsafe_allow_html=True
-)
+Call = Spot_price * norm.cdf(d1) - Strike * np.exp(-R/100 * Time) * norm.cdf(d2)
+Put = Strike * np.exp(-R/100 * Time) * norm.cdf(-d2) - Spot_price * norm.cdf(-d1)
 
-Strike_price = np.linspace(0.8 * F_t, 1.2 * F_t, 8)
+col1, col2 = st.columns(2)
 
-Vol = np.linspace(10, 45, 8) / 100
+with col1:
+    st.success(f"Call Price: ${Call:.2f}")
 
-option_prices = np.zeros((len(Vol), len(Strike_price)))
+with col2:
+    st.error(f"Put Price: ${Put:.2f}")
+
+#F_t = Spot_price * np.exp((R/100 + Storage/100) * Time)
+#F_t = round(F_t, 2)
+
+# st.markdown (
+#     f"<h1 style='text-align: left; font-size:20px;'>The fair price of the copper futures contract is ${F_t} per pound</h1>",
+#     unsafe_allow_html=True
+# )
+
+Strike_price = np.linspace(0.8 * Strike, 1.2 * Strike, 8)
+
+Vol = np.linspace(0.8 * Volatility, 1.2 * Volatility, 8) / 100
+
+call_prices = np.zeros((len(Vol), len(Strike_price)))
+
+put_prices = np.zeros((len(Vol), len(Strike_price)))
 
 for i, sigma in enumerate(Vol):
     for y, X in enumerate(Strike_price):
         d1 = (np.log(Spot_price / X) + (R/100 + 0.5 * sigma ** 2) * Time) / (sigma * np.sqrt(Time))
         d2 = d1 - sigma * np.sqrt(Time)
         C = Spot_price * norm.cdf(d1) - X * np.exp(-R/100 * Time) * norm.cdf(d2)
-        option_prices[i, y] = C
+        call_prices[i, y] = C
+
+for j, sigma in enumerate(Vol):
+    for z, X in enumerate(Strike_price):
+        d1 = (np.log(Spot_price / X) + (R/100 + 0.5 * sigma ** 2) * Time) / (sigma * np.sqrt(Time))
+        d2 = d1 - sigma * np.sqrt(Time)
+        P = X * np.exp(-R/100 * Time) * norm.cdf(-d2) - Spot_price * norm.cdf(-d1)
+        put_prices[j, z] = P
 
 fig, ax = plt.subplots(figsize=(8, 6))
+
+fig1, ax1 = plt.subplots(figsize=(8, 6))
 
 vol_ax = [f"{v*100:.0f}%" for v in Vol]
 strike_ax = [f"${round(s, 2)}" for s in Strike_price]
 
-ax = sns.heatmap(option_prices, annot=True, cmap="viridis", cbar=False, fmt=".2f", cbar_kws={'label': 'Value of C'}, xticklabels=strike_ax,yticklabels=vol_ax)
+ax = sns.heatmap(call_prices, annot=True, cmap="viridis", cbar=False, fmt=".2f", cbar_kws={'label': 'Value of C'}, xticklabels=strike_ax,yticklabels=vol_ax, ax=ax)
+
+ax1 = sns.heatmap(put_prices, annot=True, cmap="viridis", cbar=False, fmt=".2f", cbar_kws={'label': 'Value of P'}, xticklabels=strike_ax,yticklabels=vol_ax, ax=ax1)
 
 ax.set_xlabel("Strike Price")
 ax.set_ylabel("Volatility")
 
+ax1.set_xlabel("Strike Price")
+ax1.set_ylabel("Volatility")
 
+st.markdown (
+    f"<h1 style='text-align: left; font-size:20px;'>Call Option:</h1>",
+    unsafe_allow_html=True
+)
 st.pyplot(fig)
 
-
-
-# import pandas as pd
-# import numpy as np
-# from scipy.stats import norm
-
-# # Given values
-# S_t = 1.2  # Spot price in dollars
-# r = 0.02  # Risk-free rate (2%)
-# d = 0.01  # Storage cost (1%)
-# T = 0.5  # Time to maturity in years
-
-# # Calculating futures price
-# F_t = S_t * np.exp((r + d) * T)
-# print(f"The fair price of the coffee futures contract is ${F_t:.3f} per pound.")
-
-# X = 1.25 # Strike price in dollars
-# sigma = 0.25 # Volatility (25%)
-
-
-# # Calculating d1 and d2
-# d1 = (np.log(S_t / X) + (r + 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))
-# d2 = d1 - sigma * np.sqrt(T)
-
-# # Calculating call option price using Black-Scholes formula
-# C = S_t * norm.cdf(d1) - X * np.exp(-r * T) * norm.cdf(d2)
-# print(f"The price of the call option is ${C:.3f}.")
-
-
-# # Simulation parameters
-# num_simulations = 10000  # Number of simulations
-# num_steps = 252  # Number of steps (daily)
-
-# # Time increment
-# dt = T / num_steps
-
-# # Simulating price paths
-# np.random.seed(42)  # For reproducibility
-# price_paths = np.zeros((num_steps, num_simulations))
-# price_paths[0] = S_t
-
-# for t in range(1, num_steps):
-#     z = np.random.standard_normal(num_simulations)
-#     price_paths[t] = price_paths[t-1] * np.exp((r - 0.5 * sigma ** 2) * dt + sigma * np.sqrt(dt) * z)
-
-# # Calculating the average simulated price at maturity
-# average_simulated_price = np.mean(price_paths[-1])
-# print(f"The average simulated price of the coffee futures contract at maturity is ${average_simulated_price:.3f}.")
+st.markdown (
+    f"<h1 style='text-align: left; font-size:20px;'>Put Option:</h1>",
+    unsafe_allow_html=True
+)
+st.pyplot(fig1)
