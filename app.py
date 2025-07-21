@@ -9,12 +9,14 @@ st.set_page_config(layout="wide")
 
 st.title('Black Scholes Calculator')
 
+
+# Inputs on sidebar
 Spot_price = st.sidebar.number_input(
     "Spot Price", 
     min_value=0.00, 
     max_value=500.00, 
-    value=4.00, 
-    step=0.01, 
+    value=100.00, 
+    step=1.00, 
     format="%.2f"
 )
 
@@ -22,8 +24,8 @@ Strike = st.sidebar.number_input(
     "Strike Price", 
     min_value=0.00, 
     max_value=500.00, 
-    value=4.00, 
-    step=0.01, 
+    value=101.10, 
+    step=1.00, 
     format="%.2f"
 )
 
@@ -54,11 +56,15 @@ Time = st.sidebar.number_input(
     format="%.2f"
 )
 
-d1 = (np.log(Spot_price / Strike) + (R/100 + 0.5 * Volatility/100 ** 2) * Time) / (Volatility * np.sqrt(Time))
-d2 = d1 - Volatility/100 * np.sqrt(Time)
+volatility = Volatility / 100
+r = R/100
 
-Call = Spot_price * norm.cdf(d1) - Strike * np.exp(-R/100 * Time) * norm.cdf(d2)
-Put = Strike * np.exp(-R/100 * Time) * norm.cdf(-d2) - Spot_price * norm.cdf(-d1)
+# Call and Put Boxes with Price
+d_1 = (np.log(Spot_price / Strike) + (r + 0.5 * volatility ** 2) * Time) / (volatility * np.sqrt(Time))
+d_2 = d_1 - (volatility * np.sqrt(Time))
+
+Call = Spot_price * norm.cdf(d_1) - Strike * np.exp(-r * Time) * norm.cdf(d_2)
+Put = Strike * np.exp(-r * Time) * norm.cdf(-d_2) - Spot_price * norm.cdf(-d_1)
 
 col1, col2 = st.columns(2)
 
@@ -68,6 +74,7 @@ with col1:
 with col2:
     st.error(f"Put Price: ${Put:.2f}")
 
+# Heatmaps of Call and Put Options
 Strike_price = np.linspace(0.8 * Strike, 1.2 * Strike, 8)
 
 Vol = np.linspace(0.8 * Volatility, 1.2 * Volatility, 8) / 100
@@ -78,16 +85,16 @@ put_prices = np.zeros((len(Vol), len(Strike_price)))
 
 for i, sigma in enumerate(Vol):
     for y, X in enumerate(Strike_price):
-        d1 = (np.log(Spot_price / X) + (R/100 + 0.5 * sigma ** 2) * Time) / (sigma * np.sqrt(Time))
+        d1 = (np.log(Spot_price / X) + (r + 0.5 * sigma ** 2) * Time) / (sigma * np.sqrt(Time))
         d2 = d1 - sigma * np.sqrt(Time)
-        C = Spot_price * norm.cdf(d1) - X * np.exp(-R/100 * Time) * norm.cdf(d2)
+        C = Spot_price * norm.cdf(d1) - X * np.exp(r * Time) * norm.cdf(d2)
         call_prices[i, y] = C
 
 for j, sigma in enumerate(Vol):
     for z, X in enumerate(Strike_price):
-        d1 = (np.log(Spot_price / X) + (R/100 + 0.5 * sigma ** 2) * Time) / (sigma * np.sqrt(Time))
+        d1 = (np.log(Spot_price / X) + (r + 0.5 * sigma ** 2) * Time) / (sigma * np.sqrt(Time))
         d2 = d1 - sigma * np.sqrt(Time)
-        P = X * np.exp(-R/100 * Time) * norm.cdf(-d2) - Spot_price * norm.cdf(-d1)
+        P = X * np.exp(-r * Time) * norm.cdf(-d2) - Spot_price * norm.cdf(-d1)
         put_prices[j, z] = P
 
 fig, ax = plt.subplots(figsize=(20, 15), dpi=200)
@@ -131,3 +138,44 @@ with col4:
     unsafe_allow_html=True)
 
     st.pyplot(fig1)
+
+
+# The Greeks
+st.markdown (
+     f"<h1 style='text-align: left; font-size:40px;'>The Greeks:</h1>",
+    unsafe_allow_html=True)
+
+# st.markdown (
+#     f"<h1 style='text-align: left; font-size:20px;'>Delta: </h1>",
+#     unsafe_allow_html=True)
+
+
+# Delta
+D_Call = norm.cdf(d_1)
+D_Put = -norm.cdf(-d_1)
+
+# Gamma
+G_Call_Put = norm.pdf(d_1) / (Spot_price * volatility * np.sqrt(Time))
+
+# Vega
+V_Call_Put = (norm.pdf(d_1) * Spot_price * np.sqrt(Time)) / 100 
+
+# Theta
+T_Call = (-(Spot_price * volatility * norm.pdf(d_1)) / (2 * np.sqrt(Time)) - (r * Strike * np.exp(-r * Time) * norm.cdf(d_2))) / 365
+T_Put = (-(Spot_price * volatility * norm.pdf(d_1)) / (2 * np.sqrt(Time)) + (r * Strike * np.exp(-r * Time) * norm.cdf(-d_2))) / 365
+
+# Rho
+R_Call = (Strike * Time * np.exp(-r * Time) * norm.cdf(d_2)) /100
+R_Put = (-Strike * Time * np.exp(-r * Time) * norm.cdf(-d_2)) / 100
+
+Greeks = {
+    "" : ["Call Option", "Put Option"],
+    "Delta" : [D_Call, D_Put],
+    "Gamma" : [G_Call_Put, G_Call_Put],
+    "Vega" : [V_Call_Put, V_Call_Put],
+    "Theta" : [T_Call, T_Put],
+    "Rho" : [R_Call, R_Put]
+}
+
+greeks_df = pd.DataFrame(Greeks)
+st.table(greeks_df)
