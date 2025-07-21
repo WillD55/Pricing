@@ -7,7 +7,7 @@ import seaborn as sns
 
 st.set_page_config(layout="wide")
 
-st.title('Black Scholes Calculator')
+st.title('Black-Scholes Model')
 
 
 # Inputs on sidebar
@@ -74,7 +74,10 @@ with col1:
 with col2:
     st.error(f"Put Price: ${Put:.2f}")
 
+
 # Heatmaps of Call and Put Options
+st.title('HeatMaps')
+
 Strike_price = np.linspace(0.8 * Strike, 1.2 * Strike, 8)
 
 Vol = np.linspace(0.8 * Volatility, 1.2 * Volatility, 8) / 100
@@ -141,14 +144,7 @@ with col4:
 
 
 # The Greeks
-st.markdown (
-     f"<h1 style='text-align: left; font-size:40px;'>The Greeks:</h1>",
-    unsafe_allow_html=True)
-
-# st.markdown (
-#     f"<h1 style='text-align: left; font-size:20px;'>Delta: </h1>",
-#     unsafe_allow_html=True)
-
+st.title('The Greeks')
 
 # Delta
 D_Call = norm.cdf(d_1)
@@ -179,3 +175,23 @@ Greeks = {
 
 greeks_df = pd.DataFrame(Greeks)
 st.table(greeks_df)
+
+st.markdown (
+    f"<h1 style='text-align: left; font-size:15px;'>Delta: Measure of sensitivity of an option's price to changes in the asset's price. If the price of the asset increases by $1, the price of the option will change by the Delta amount.</h1>",
+    unsafe_allow_html=True)
+
+st.markdown (
+    f"<h1 style='text-align: left; font-size:15px;'>Gamma: Measure of Delta's change to changes in the price of the asset. If the price of the asset increases by $1, the option's Delta will change by Gamma amount.</h1>",
+    unsafe_allow_html=True)
+
+st.markdown (
+    f"<h1 style='text-align: left; font-size:15px;'>Vega: Measure of sensitivity of an option's price to change in the volatility. If the volatility of the asset increases by 1%, the option price will change by the Vega amount.</h1>",
+    unsafe_allow_html=True)
+
+st.markdown (
+    f"<h1 style='text-align: left; font-size:15px;'>Theta: Measure of sensitivity of an option's price to change in the option's time to maturity. If the option's time to maturity decreases by one day, the option's price will change by Theta amount. </h1>",
+    unsafe_allow_html=True)
+
+st.markdown (
+    f"<h1 style='text-align: left; font-size:15px;'>Rho: Measure of sensitivity of an option's price to change in interest rate. If a benchmark interest rate increases by 1%, the option price will change by the Rho amount.</h1>",
+    unsafe_allow_html=True)
