@@ -56,6 +56,9 @@ Time = st.sidebar.number_input(
     format="%.2f"
 )
 
+st.sidebar.markdown("**Developed by Will Drake**")
+st.sidebar.markdown("[GitHub](https://github.com/WillD55)")
+
 volatility = Volatility / 100
 r = R/100
 
@@ -110,7 +113,7 @@ strike_ax = [f"${round(s, 2)}" for s in Strike_price]
 col3, col4 = st.columns(2)
 
 with col3:
-    ax = sns.heatmap(call_prices, annot=True, cmap="viridis", annot_kws={"size": 35, "weight": "bold"}, cbar=False, fmt=".2f", cbar_kws={'label': 'Value of C'}, xticklabels=strike_ax,yticklabels=vol_ax, ax=ax)
+    ax = sns.heatmap(call_prices, annot=True, cmap="Greens", annot_kws={"size": 35, "weight": "bold"}, cbar=False, fmt=".2f", cbar_kws={'label': 'Value of C'}, xticklabels=strike_ax,yticklabels=vol_ax, ax=ax)
 
     ax.set_xlabel("Strike Price", fontsize = 25, fontweight = "bold")
     ax.set_ylabel("Volatility", fontsize = 25, fontweight = "bold")
@@ -125,7 +128,7 @@ with col3:
     st.pyplot(fig)
 
 with col4:
-    ax1 = sns.heatmap(put_prices, annot=True, cmap="viridis", annot_kws={"size": 35, "weight": "bold"},  cbar=False, fmt=".2f", cbar_kws={'label': 'Value of P'}, xticklabels=strike_ax,yticklabels=vol_ax, ax=ax1)
+    ax1 = sns.heatmap(put_prices, annot=True, cmap="Reds", annot_kws={"size": 35, "weight": "bold"},  cbar=False, fmt=".2f", cbar_kws={'label': 'Value of P'}, xticklabels=strike_ax,yticklabels=vol_ax, ax=ax1)
 
     ax1.set_xlabel("Strike Price")
     ax1.set_ylabel("Volatility")
