@@ -52,7 +52,7 @@ Time = st.sidebar.number_input(
     min_value=0.00,
     max_value=10.00,
     value=1.50,
-    step=0.50,
+    step=0.25,
     format="%.2f"
 )
 
