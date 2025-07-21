@@ -27,13 +27,32 @@ Strike = st.sidebar.number_input(
     format="%.2f"
 )
 
-Volatility = st.sidebar.slider("Volatility (%): ", 0.0, 50.0, 20.0, step = 5.0)
+Volatility = st.sidebar.number_input(
+    "Volatility (%)",
+    min_value=0.00,
+    max_value=100.00,
+    value=20.00,
+    step=1.00,
+    format="%.2f"
+)
 
-R = st.sidebar.slider("Risk-free rate (%): ", 2.0, 6.0, 2.0, step = 0.1)
+R = st.sidebar.number_input(
+    "Risk-free rate (%)",
+    min_value=0.00,
+    max_value=5.00,
+    value=2.00,
+    step=0.10,
+    format="%.2f"
+)
 
-#Storage = st.sidebar.slider("Storage Cost (%): ", 0.00, 3.00, 1.00, step = 0.01)
-
-Time = st.sidebar.slider("Time to maturity (year): ", 0.0, 3.00, 1.0, step = 0.5)
+Time = st.sidebar.number_input(
+    "Time to maturity (years)",
+    min_value=0.00,
+    max_value=10.00,
+    value=1.50,
+    step=0.50,
+    format="%.2f"
+)
 
 d1 = (np.log(Spot_price / Strike) + (R/100 + 0.5 * Volatility/100 ** 2) * Time) / (Volatility * np.sqrt(Time))
 d2 = d1 - Volatility/100 * np.sqrt(Time)
