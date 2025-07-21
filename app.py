@@ -68,14 +68,6 @@ with col1:
 with col2:
     st.error(f"Put Price: ${Put:.2f}")
 
-#F_t = Spot_price * np.exp((R/100 + Storage/100) * Time)
-#F_t = round(F_t, 2)
-
-# st.markdown (
-#     f"<h1 style='text-align: left; font-size:20px;'>The fair price of the copper futures contract is ${F_t} per pound</h1>",
-#     unsafe_allow_html=True
-# )
-
 Strike_price = np.linspace(0.8 * Strike, 1.2 * Strike, 8)
 
 Vol = np.linspace(0.8 * Volatility, 1.2 * Volatility, 8) / 100
